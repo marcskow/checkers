@@ -1,5 +1,7 @@
 import Data.Tree
 import Data.Maybe
+import qualified Data.Foldable as F
+import Data.Monoid
 
 data HittingTree a = Nil | HittingNode a [ HittingTree a ] deriving Show
 data Figure = WS | BS | WQ | BQ | E deriving Show
@@ -23,15 +25,27 @@ instance Eq Figure where
     E == E = True
     _ == _ = False
 
+instance F.Foldable HittingTree where
+   foldMap f Nil = mempty
+   foldMap f (HittingNode x [Nil,Nil]) = f x
+   foldMap f (HittingNode x [l,r]) = F.foldMap f l `mappend` f x `mappend` F.foldMap f r
+
+treeToLoL Nil = []
+treeToLoL (HittingNode a [ l, r ]) = [a] : merge (treeToLoL l) (treeToLoL r)
+
+merge [] ys = ys
+merge xs [] = xs
+merge (x:xs)(y:ys) = (x ++ y) : merge xs ys
+
 startingBoard = reverse [[ E, BS, E, BS, E, BS, E, BS], [ BS, E, BS, E, BS, E, BS, E ],
 		 [ E, BS, E, BS, E, BS, E, BS], [ E, E, E, E, E, E, E, E ],
 		 [ E, E, E, E, E, E, E, E], [ WS, E, WS, E, WS, E, WS, E ],
 		 [ E, WS, E, WS, E, WS, E, WS ], [ WS, E, WS, E, WS, E, WS, E ]]
-
-showFigure WS = "w"
-showFigure BS = "b"
-showFigure WQ = "W"
-showFigure BQ = "B"
+--26C0 26C1 26C2 26C3 9920 9921 9922 9923
+showFigure WS = "\9922"
+showFigure BS = "\9920"
+showFigure WQ = "\9923"
+showFigure BQ = "\9921"
 showFigure E = "."
 
 showRow [] = " \n"
@@ -64,9 +78,9 @@ genMoves (a,b) board
     | ((get (a,b) board) == WS) = genWSMoves (a,b)
     | ((get (a,b) board) == BS) = genBSMoves (a,b)
 
-genWSMoves (a,b) = filter (\(x,y) -> and [x >= 0, x <=7, y >= 0, y <= 7] ) $ [1..1] >>= ( \f -> [(a+f,b+f),(a-f,b+f)])
+genWSMoves (a,b) = filter (\(x,y) -> Prelude.and [x >= 0, x <=7, y >= 0, y <= 7] ) $ [1..1] >>= ( \f -> [(a+f,b+f),(a-f,b+f)])
 
-genBSMoves (a,b) = filter (\(x,y) -> and [x >= 0, x <=7, y >= 0, y <= 7] ) $ [1..1] >>= ( \f -> [(a+f,b-f),(a-f,b-f)])
+genBSMoves (a,b) = filter (\(x,y) -> Prelude.and [x >= 0, x <=7, y >= 0, y <= 7] ) $ [1..1] >>= ( \f -> [(a+f,b-f),(a-f,b-f)])
 
 filterNormalMoves [] _ = []
 filterNormalMoves (x : xs) board =
@@ -109,8 +123,8 @@ right RIGHT_UP i (x,y) = (x+i,y+i)
 checkIsLeftEmpty t (x,y) board = ((get (leftSt t (x,y)) board) == E)
 checkIsLeftOpponent t (x,y) board = ((get (leftSt t (x,y)) board) == (opposedFigure t))
 
-canWSHitLeft (x,y) board = ((get (left LEFT_UP 1 (x,y)) board) == BS) && ((get (left LEFT_UP 2 (x,y)) board) == E)
-canWSHitRight (x,y) board = ((get (right RIGHT_UP 1 (x,y)) board) == BS) && ((get (right RIGHT_UP 2 (x,y)) board) == E)
+canWSHitLeft (x,y) board =  ((x-2>=0) && (y+2<=7)) && ((get (left LEFT_UP 1 (x,y)) board) == BS) && ((get (left LEFT_UP 2 (x,y)) board) == E)
+canWSHitRight (x,y) board = ((x-2>=0) && (y+2<=7)) && ((get (right RIGHT_UP 1 (x,y)) board) == BS) && ((get (right RIGHT_UP 2 (x,y)) board) == E)
 
 buildHittingTree False (x,y) board = Nil
 buildHittingTree t (x,y) board =
@@ -118,13 +132,27 @@ buildHittingTree t (x,y) board =
         rightTree = (buildHittingTree (canWSHitRight (x,y) board) (x+2,y+2) board)
     in HittingNode (x,y) [ leftTree, rightTree ]
 
+
+--data HittingTree a = Nil | HittingNode a [ HittingTree a ] deriving Show, Eq
+
+listtree' Nil = []
+listtree' (HittingNode label [Nil,Nil]) = [[label]]
+listtree' (HittingNode label xs) = map (label:) $ concat $ map listtree' xs
+
+size Nil = 0
+size (HittingNode _ [ leftTree, rightTree ]) = 1 + max (size leftTree) (size rightTree)
+hittings tree = (size tree) - 1
+
+
+hittingMoves Nil = 0 
+
 updateMatrix m x (c,r) =
   take r m ++
   [take c (m !! r) ++ [x] ++ drop (c + 1) (m !! r)] ++
   drop (r + 1) m
 
 checkIsMoveValid (x1,y1)(x2,y2) board
-    | ((((get (x1,y1) board) == WS) || ((get (x1,y1) board) == BS)) && (x2>=0) && (x2<=7) && (y2>=0) && (y2<=7) && (abs(x2-x1) <= 1)) = True
+    | ((x2>=0) && (x2<=7) && (y2>=0) && (y2<=7) && (abs(x2-x1) <= 1) && (((get (x1,y1) board) == WS) || ((get (x1,y1) board) == BS))) = True
     | otherwise = False
 
 deleteFromBoard m (r,c) = updateMatrix m E (r,c)
@@ -136,7 +164,25 @@ move' board (x1,y1)(x2,y2) =
 
   --  else ((checkIsMoveValid (x1,y1)(x2,y2)) == True) (updateMatrix board (get (x1,y1)) (x2,y2))
 
+treeToList (HittingNode n a) = n : Prelude.concat (map treeToList a)
 
+--pathsToNode x (HittingNode y ns) = [[x] | x == y] ++ map (y:) (pathsToNode x =<< ns)
+
+--listtree (HittingNode label [Nil,Nil]) = [[label]]
+--listtree (HittingNode label xs) = map (label:) $ concat $ map listtree xs
+
+{-
+let b1 = (move' startingBoard (5,5)(4,4))
+let b2 = (move' b1 (4,4)(3,3))
+let b1 = (move' b2 (1,5)(0,4))
+let b2 = (move' b1 (0,4)(1,3))
+let b1 = (move' b2 (4,6)(5,5))
+let tree = buildHittingTree True (2,2) b1
+let tree2 = buildHittingTree True (4,2) b1
+
+hittings tree
+hittings tree2
+-}
 
 {-
 showRealDescription [][] = "  12345678 \n"
