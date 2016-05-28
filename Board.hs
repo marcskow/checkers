@@ -12,10 +12,14 @@ module Board ( opposedFigure
 			 , testBoard
 			 , Figure(..)
 			 , Field(..)
+			 , Board
+			 , Position
 			 ) where
 
 data Figure = WS | BS | WQ | BQ | E deriving Show
 data Field = Empty | Pawn
+type Board = [[Figure]]
+type Position = (Int, Int)
 
 instance Eq Figure where
     WS == WS = True
@@ -37,7 +41,7 @@ opposedFigure f
     We are using hardcoded board, should it has it's own type ?
     Probably yes
 -}
-startingBoard :: [[Figure]]
+startingBoard :: Board
 startingBoard = reverse [[  E, BS,  E, BS,  E, BS,  E, BS],
                          [ BS,  E, BS,  E, BS,  E, BS,  E ],
 		                 [  E, BS,  E, BS,  E, BS,  E, BS],
@@ -47,7 +51,7 @@ startingBoard = reverse [[  E, BS,  E, BS,  E, BS,  E, BS],
 		                 [  E, WS,  E, WS,  E, WS,  E, WS ],
 		                 [ WS,  E, WS,  E, WS,  E, WS,  E ]]
 
-testBoard :: [[Figure]]
+testBoard :: Board
 testBoard = reverse     [[  E, BS,  E, BS,  E, BS,  E, BS ],
                          [ BS,  E, BS,  E, BS,  E, BS,  E ],
 		                 [  E, BS,  E, BS,  E, BS,  E, BS ],
@@ -77,11 +81,11 @@ showRow :: [Figure] -> [Char]
 showRow [] = " \n"
 showRow (x : xs) = (showFigure x) ++ " " ++ (showRow xs)
 
-showBoard :: [[Figure]] -> [Char]
+showBoard :: Board -> [Char]
 showBoard [] = ""
 showBoard (x : xs) = (showRow x) ++ (showBoard xs)
 
-boardInRows :: [[Figure]] -> [String]
+boardInRows :: Board -> [String]
 boardInRows board = lines (showBoard board)
 
 showDescription :: [[Char]] -> [[Char]] -> [Char]
@@ -91,11 +95,11 @@ showDescription (x : xs) (y : ys) = x ++ y ++ "\n" ++ (showDescription xs ys)
 rowsIndex :: [[Char]]
 rowsIndex = reverse [ "7 ", "6 ", "5 ", "4 ", "3 ", "2 ", "1 ","0 " ]
 
-sh :: [[Figure]] -> IO ()
+sh :: Board -> IO ()
 sh board= putStr("  0 1 2 3 4 5 6 7 \n" ++ (showDescription rowsIndex (boardInRows board)))
 
 getRow :: Int -> [a] -> a
 getRow x board = board !! x
 
-get :: (Int, Int) -> [[a]] -> a
+get :: Position -> [[a]] -> a
 get (x,y) board = (board !! y) !! x
