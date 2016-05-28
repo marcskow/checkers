@@ -10,6 +10,7 @@ module Board ( opposedFigure
 			 , getRow
 			 , get
 			 , testBoard
+			 , testBoard'
 			 , Figure(..)
 			 , Field(..)
 			 , Board
@@ -60,6 +61,17 @@ testBoard = reverse     [[  E, BS,  E, BS,  E, BS,  E, BS ],
 		                 [ WS,  E, WS,  E, WS,  E,  E,  E ],
 		                 [  E, WS,  E,  E,  E, WS,  E, WS ],
 		                 [ WS,  E, WS,  E, WS,  E, WS,  E ]]
+
+testBoard' :: Board
+testBoard' = reverse    [[  E, BS,  E, BS,  E, BS,  E, BS ],
+                         [  E,  E, BS,  E,  E,  E, BS,  E ],
+		                 [  E, BS,  E, BS,  E, BS,  E, BS ],
+		                 [  E,  E,  E,  E,  E,  E,  E,  E ],
+		                 [  E, BS,  E, BS,  E,  E,  E,  E ],
+		                 [ WS,  E, WS,  E, WS,  E, WS,  E ],
+		                 [  E, WS,  E, WS,  E, WS,  E, WS ],
+		                 [ WS,  E, WS,  E, WS,  E, WS,  E ]]
+
 {-
     We are using unicode, where:
     26C0 == 9920 is White Pawn icon (in black console we are using it as Black Pawn icon)

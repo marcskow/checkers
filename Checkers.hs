@@ -5,9 +5,9 @@ import Data.Function
 import Board
 import Move
 import Data.Ord
+import PlayerGame
 
 data HittingTree a = Nil | HittingNode a [ HittingTree a ] deriving Show
-data Direction = LEFT_UP | LEFT_DOWN | RIGHT_UP | RIGHT_DOWN
 
 merge :: [[a]] -> [[a]] -> [[a]]
 merge [] ys = ys
@@ -48,9 +48,24 @@ willBeInside (x,y) LEFT_DOWN = ((x-2>=0) && (y-2>=0))
 willBeInside (x,y) RIGHT_UP = ((x+2<=7) && (y+2<=7))
 willBeInside (x,y) RIGHT_DOWN = ((x+2<=7) && (y-2>=0))
 
+isInside f (x,y) LEFT_UP = ((x-f>=0) && (y+f<=7))
+isInside f (x,y) LEFT_DOWN = ((x-f>=0) && (y-f>=0))
+isInside f (x,y) RIGHT_UP = ((x+f<=7) && (y+f<=7))
+isInside f (x,y) RIGHT_DOWN = ((x+f<=7) && (y-f>=0))
+
+
 canHit :: Figure -> Direction -> Position -> Board -> Bool
 canHit WS dir (x,y) board = (willBeInside (x,y) dir) && ((get (nextField dir 1 (x,y)) board) == BS) && ((get (nextField dir 2 (x,y)) board) == E)
 canHit BS dir (x,y) board = (willBeInside (x,y) dir) && ((get (nextField dir 1 (x,y)) board) == WS) && ((get (nextField dir 2 (x,y)) board) == E)
+
+blockingWay 1 (x,y) dir board = False
+blockingWay f (x,y) dir board = (length ([ f+1 | f <- [1..7], (isInside (f+1) (x,y) dir) && ((get (nextField dir f (x,y)) board) == BS) && ((get (nextField dir (f+1) (x,y)) board) == BS)])) /= 0
+findFirstQueenHitStep WQ dir (x,y) board = [ f+1 | f <- [1..7], ((blockingWay f (x,y) dir board) == False ) && (isInside (f+1) (x,y) dir) && ((get (nextField dir f (x,y)) board) == BS) && ((get (nextField dir (f+1) (x,y)) board) == E)]
+
+findFirstQueenHit WQ dir (x,y) board
+    | ((findFirstQueenHitStep WQ dir (x,y) board) == []) = []
+    | otherwise = [(nextField dir (head (findFirstQueenHitStep WQ dir (x,y) board)) (x,y))]
+-- Enrique Iglesias - Duele el corazon
 
 buildHittingTree :: Figure -> Bool -> Position -> Board -> HittingTree Position
 buildHittingTree w False (x,y) board = Nil
@@ -64,6 +79,23 @@ buildHittingTree w t (x,y) board =
         rightTreeDown = if (canHit w RIGHT_DOWN (x,y) board) then (buildHittingTree w True (nextField RIGHT_DOWN 2 (x,y)) (move board (Hit (x,y) (nextField RIGHT_DOWN 2 (x,y)))))
                         else Nil
     in HittingNode (x,y) [ leftTreeUp, leftTreeDown, rightTreeUp, rightTreeDown ]
+
+buildHittingQueenTree w False (x,y) board = Nil
+buildHittingQueenTree w t (x,y) board =
+    let leftTreeUp =    let firstQueenLeftUpHit = (findFirstQueenHit w LEFT_UP (x,y) board)
+                        in if (firstQueenLeftUpHit /= []) then (buildHittingQueenTree w True (head(firstQueenLeftUpHit)) (move board (Hit (x,y) (head(firstQueenLeftUpHit)))))
+                           else Nil
+        leftTreeDown =  let firstQueenLeftDownHit = (findFirstQueenHit w LEFT_DOWN (x,y) board)
+                           in if (firstQueenLeftDownHit /= []) then (buildHittingQueenTree w True (head(firstQueenLeftDownHit)) (move board (Hit (x,y) (head(firstQueenLeftDownHit)))))
+                           else Nil
+        rightTreeUp =   let firstQueenRightUpHit = (findFirstQueenHit w RIGHT_UP (x,y) board)
+                           in if (firstQueenRightUpHit /= []) then (buildHittingQueenTree w True (head(firstQueenRightUpHit)) (move board (Hit (x,y) (head(firstQueenRightUpHit)))))
+                           else Nil
+        rightTreeDown = let firstQueenRightDownHit = (findFirstQueenHit w RIGHT_DOWN (x,y) board)
+                           in if (firstQueenRightDownHit /= []) then (buildHittingQueenTree w True (head(firstQueenRightDownHit)) (move board (Hit (x,y) (head(firstQueenRightDownHit)))))
+                           else Nil
+    in HittingNode (x,y) [ leftTreeUp, leftTreeDown, rightTreeUp, rightTreeDown ]
+
 
 listtree :: HittingTree a -> [[a]]
 listtree Nil = []
@@ -82,16 +114,32 @@ maximumByM c (x:xs) = maximumByM' c xs [x]
 getMaximumHittingPath :: HittingTree a -> [[a]]
 getMaximumHittingPath tree = maximumByM (comparing length) (listtree tree)
 
+{-
+    Magicznie wybierz najlepsza
+-}
+-- TODO !!!!!!!!!!!!!!!!!!!
+chooseTheBestMaximumHittingPath path
+    | length(path) == 1 = head path
+    | otherwise = head path --for now
+
+buildHittingMovesFromPath path = HittingSequence [ Hit (path !! x) (path !! (x+1)) | x <- [0..(length(path)-2)]]
+
+
 
 {-
-let b1 = (move' startingBoard (5,5)(4,4))
-let b2 = (move' b1 (4,4)(3,3))
-let b1 = (move' b2 (1,5)(0,4))
-let b2 = (move' b1 (0,4)(1,3))
-let b1 = (move' b2 (4,6)(5,5))
-let b2 = (move' b1 (0,6)(1,5))
+let b1 = (move startingBoard (Step (5,5)(4,4)))
+let b2 = (move b1 (Step(4,4)(3,3)))
+let b1 = (move b2 (Step(1,5)(0,4)))
+let b2 = (move b1 (Step(0,4)(1,3)))
+let b1 = (move b2 (Step(4,6)(5,5)))
+let b2 = (move b1 (Step(0,6)(1,5)))
 let tree3 = buildHittingTree WS True (4,2) b2
 
 hittings tree
 hittings tree2
+
+let t = buildHittingTree WS True (4,2) testBoard'
+let path = getMaximumHittingPath t
+let actual = chooseTheBestMaximumHittingPath path
+buildHittingMovesFromPath actual
 -}

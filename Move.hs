@@ -3,12 +3,16 @@ module Move ( updateBoard
              , checkIsMoveValid
              , deleteFromBoard
              , Move(..)
+             , Direction(..)
              , standardToQueen
+             , getDirection
+             , previousField
              ) where
 
 import Board
 
-data Move = Step Position Position | Hit Position Position deriving Eq
+data Move = Step Position Position | Hit Position Position | HittingSequence [ Move ] deriving (Show, Eq)
+data Direction = LEFT_UP | LEFT_DOWN | RIGHT_UP | RIGHT_DOWN
 
 updateBoard :: [[a]] -> a -> (Int, Int) -> [[a]]
 updateBoard m x (c,r) =
@@ -19,7 +23,7 @@ updateBoard m x (c,r) =
 move :: Board -> Move -> Board
 move board (Hit (x1,y1) (x2,y2)) = let board' = let board'' = (updateBoard board (get (x1,y1) board) (x2,y2))
                                                 in (deleteFromBoard board'' (x1,y1))
-                                   in (deleteFromBoard board' (((x1+x2) `div` 2),((y1+y2) `div` 2)))
+                                   in (deleteFromBoard board' (previousField((getDirection (x1,y1)(x2,y2))) 1 (x2,y2)))
 move board (Step (x1,y1) (x2,y2))
     | ((checkIsMoveValid (x1,y1)(x2,y2) board) == True) =
         let board' = (updateBoard board (get (x1,y1) board) (x2,y2))
@@ -37,3 +41,17 @@ deleteFromBoard m (x,y) = updateBoard m E (x,y)
 standardToQueen :: Figure -> Board -> Position -> Board
 standardToQueen WS board (x,y) = updateBoard board WQ (x,y)
 standardToQueen BS board (x,y) = updateBoard board BQ (x,y)
+
+getDirection :: (Ord a1, Ord a) => (a,a1) -> (a,a1) -> Direction
+getDirection (x1, y1)(x2, y2)
+    | (x2 < x1 && y2 > y1) = LEFT_UP
+    | (x2 < x1 && y2 < y1) = LEFT_DOWN
+    | (x2 > x1 && y2 > y1) = RIGHT_UP
+    | (x2 > x1 && y2 < y1) = RIGHT_DOWN
+
+previousField :: Num t => Direction -> t -> (t,t) -> (t,t)
+previousField RIGHT_UP i (x,y) = (x-i,y-i)
+previousField RIGHT_DOWN i (x,y) = (x-i,y+i)
+previousField LEFT_UP i (x,y) = (x+i,y-i)
+previousField LEFT_DOWN i (x,y) = (x+i,y+i)
+
