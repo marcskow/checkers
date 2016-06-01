@@ -42,6 +42,7 @@ opposedFigure f
     We are using hardcoded board, should it has it's own type ?
     Probably yes
 -}
+
 startingBoard :: Board
 startingBoard = reverse [[  E, BS,  E, BS,  E, BS,  E, BS],
                          [ BS,  E, BS,  E, BS,  E, BS,  E ],

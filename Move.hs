@@ -10,9 +10,11 @@ module Move (  Move(..)
              , getDirection
              , willBeInside
              , isInside
+             , moveEstimation
              ) where
 
 import Board
+
 
 data Move = Step Position Position | Hit Position Position | HittingSequence [ Move ] deriving (Show, Eq)
 data Direction = LEFT_UP | LEFT_DOWN | RIGHT_UP | RIGHT_DOWN
@@ -62,6 +64,10 @@ move board (Step (x1,y1) (x2,y2))
         let board' = (updateBoard board (get (x1,y1) board) (x2,y2))
         in (deleteFromBoard board' (x1,y1))
     | otherwise = board
+move board (HittingSequence []) = board
+move board (HittingSequence (x:xs)) =
+    let board' = move board (x)
+    in move board' (HittingSequence xs)
 
 checkIsMoveValid :: (Ord a, Num a) => Position -> (Int, a) -> Board -> Bool
 checkIsMoveValid (x1,y1)(x2,y2) board
@@ -75,4 +81,7 @@ standardToQueen :: Figure -> Board -> Position -> Board
 standardToQueen WS board (x,y) = updateBoard board WQ (x,y)
 standardToQueen BS board (x,y) = updateBoard board BQ (x,y)
 
-
+moveEstimation ( Step _ _ ) = 1
+moveEstimation ( Hit _ _ ) = 3
+moveEstimation ( HittingSequence [] ) = 0
+moveEstimation ( HittingSequence (x:xs) ) = (moveEstimation x) + (moveEstimation (HittingSequence xs))

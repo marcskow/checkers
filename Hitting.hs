@@ -53,12 +53,12 @@ blockingWay 1 (x,y) dir board = False
 blockingWay f (x,y) dir board = (length ([ (a+1) | a <- [1..7], (isInside (a+1) (x,y) dir) && ((get (nextField dir a (x,y)) board) == BS) && ((get (nextField dir (a+1) (x,y)) board) == BS)])) /= 0
 
 findFirstQueenHitStep :: Figure -> Direction -> Position -> Board -> [Int]
-findFirstQueenHitStep WQ dir (x,y) board = [ f+1 | f <- [1..7], ((blockingWay f (x,y) dir board) == False ) && (isInside (f+1) (x,y) dir) && ((get (nextField dir f (x,y)) board) == BS) && ((get (nextField dir (f+1) (x,y)) board) == E)]
+findFirstQueenHitStep w dir (x,y) board = [ f+1 | f <- [1..7], ((blockingWay f (x,y) dir board) == False ) && (isInside (f+1) (x,y) dir) && ((get (nextField dir f (x,y)) board) == (opposedFigure w)) && ((get (nextField dir (f+1) (x,y)) board) == E)]
 
 findFirstQueenHit :: Figure -> Direction -> Position -> Board -> [Position]
-findFirstQueenHit WQ dir (x,y) board
-    | ((findFirstQueenHitStep WQ dir (x,y) board) == []) = []
-    | otherwise = [(nextField dir (head (findFirstQueenHitStep WQ dir (x,y) board)) (x,y))]
+findFirstQueenHit w dir (x,y) board
+    | ((findFirstQueenHitStep w dir (x,y) board) == []) = []
+    | otherwise = [(nextField dir (head (findFirstQueenHitStep w dir (x,y) board)) (x,y))]
 
 listtree :: HittingTree a -> [[a]]
 listtree Nil = []
