@@ -81,7 +81,7 @@ standardToQueen :: Figure -> Board -> Position -> Board
 standardToQueen WS board (x,y) = updateBoard board WQ (x,y)
 standardToQueen BS board (x,y) = updateBoard board BQ (x,y)
 
-moveEstimation ( Step _ _ ) = 1
+moveEstimation ( Step _ _ ) = 0
 moveEstimation ( Hit _ _ ) = 3
 moveEstimation ( HittingSequence [] ) = 0
 moveEstimation ( HittingSequence (x:xs) ) = (moveEstimation x) + (moveEstimation (HittingSequence xs))
