@@ -1,24 +1,13 @@
-module Board ( opposedFigure
-			 , startingBoard
-			 , showFigure
-			 , showRow
-			 , showBoard
-			 , showDescription
-			 , boardInRows
-			 , rowsIndex
-			 , sh
-			 , getRow
-			 , get
-			 , testBoard
-			 , testBoard'
-			 , Figure(..)
-			 , Field(..)
-			 , Board
-			 , Position
+module Board ( opposedFigure, startingBoard, sh
+			 , get, opposedColor, getColor, is
+			 , playableArea
+			 , Figure(..), Field(..), Color(..)
+			 , Board, Position
 			 ) where
 
 data Figure = WS | BS | WQ | BQ | E deriving Show
 data Field = Empty | Pawn
+data Color = White | Black | None
 type Board = [[Figure]]
 type Position = (Int, Int)
 
@@ -29,6 +18,28 @@ instance Eq Figure where
     BQ == BQ = True
     E == E = True
     _ == _ = False
+
+instance Eq Color where
+    White == White = True
+    Black == Black = True
+    _ == _ = False
+
+getColor :: Figure -> Color
+getColor WS = White
+getColor WQ = White
+getColor BS = Black
+getColor BQ = Black
+getColor E = None
+
+opposedColor :: Color -> Color
+opposedColor color
+    | color == White = Black
+    | color == Black = White
+    | color == None = None
+
+is :: Color -> Position -> Board -> Bool
+is White (a,b) board = ((get (a,b) board) == WS) || ((get (a,b) board) == WQ)
+is Black (a,b) board = ((get (a,b) board) == BS) || ((get (a,b) board) == BQ)
 
 opposedFigure :: Figure -> Figure
 opposedFigure f
@@ -53,25 +64,12 @@ startingBoard = reverse [[  E, BS,  E, BS,  E, BS,  E, BS],
 		                 [  E, WS,  E, WS,  E, WS,  E, WS ],
 		                 [ WS,  E, WS,  E, WS,  E, WS,  E ]]
 
-testBoard :: Board
-testBoard = reverse     [[  E, BS,  E, BS,  E, BS,  E, BS ],
-                         [ BS,  E, BS,  E, BS,  E, BS,  E ],
-		                 [  E, BS,  E, BS,  E, BS,  E, BS ],
-		                 [  E,  E,  E,  E, WS,  E, WS,  E ],
-		                 [  E,  E,  E,  E,  E,  E,  E,  E ],
-		                 [ WS,  E, WS,  E, WS,  E,  E,  E ],
-		                 [  E, WS,  E,  E,  E, WS,  E, WS ],
-		                 [ WS,  E, WS,  E, WS,  E, WS,  E ]]
 
-testBoard' :: Board
-testBoard' = reverse    [[  E, BS,  E, BS,  E, BS,  E, BS ],
-                         [  E,  E, BS,  E,  E,  E, BS,  E ],
-		                 [  E, BS,  E, BS,  E, BS,  E, BS ],
-		                 [  E,  E,  E,  E,  E,  E,  E,  E ],
-		                 [  E, BS,  E, BS,  E,  E,  E,  E ],
-		                 [ WS,  E, WS,  E, WS,  E, WS,  E ],
-		                 [  E, WS,  E, WS,  E, WS,  E, WS ],
-		                 [ WS,  E, WS,  E, WS,  E, WS,  E ]]
+playableArea :: [Position]
+playableArea = [(0,0),(2,0),(4,0),(6,0),(1,1),(3,1),(5,1),(7,1),
+                (0,2),(2,2),(4,2),(6,2),(1,3),(3,3),(5,3),(7,3),
+                (0,4),(2,4),(4,4),(6,4),(1,5),(3,5),(5,5),(7,5),
+                (0,6),(2,6),(4,6),(6,6),(1,7),(3,7),(5,7),(7,7)]
 
 {-
     We are using unicode, where:
@@ -109,10 +107,7 @@ rowsIndex :: [[Char]]
 rowsIndex = reverse [ "7 ", "6 ", "5 ", "4 ", "3 ", "2 ", "1 ","0 " ]
 
 sh :: Board -> IO ()
-sh board= putStr("  0 1 2 3 4 5 6 7 \n" ++ (showDescription rowsIndex (boardInRows board)))
-
-getRow :: Int -> [a] -> a
-getRow x board = board !! x
+sh board = putStr("  0 1 2 3 4 5 6 7 \n" ++ (showDescription rowsIndex (boardInRows board)))
 
 get :: Position -> [[a]] -> a
 get (x,y) board = (board !! y) !! x

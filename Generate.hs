@@ -1,33 +1,14 @@
-module Generate (
-          genMoves
-        , genNormalMoves
-        , genAllNormalQueenMoves
-        , genNormalQueenSteps
-        , genNormalQueenMoves
-        , genNormalQueenMove
-        , checkBlockingWay
-        , filterNormalMoves
-        , filterOneMove
+module Generate ( genMoves
+        , genNormalMoves, genAllNormalQueenMoves
+        , genNormalQueenSteps, genNormalQueenMoves
+        , genNormalQueenMove, checkBlockingWay
+        , filterNormalMoves, filterOneMove
         , generateHittings
 ) where
 
 import Board
 import Move
 import Hitting
-
-
-{-
-buildHittingTree :: Figure -> Bool -> Position -> Board -> HittingTree Position
-buildHittingTree w False (x,y) board = Nil
-buildHittingTree w t (x,y) board =
-    let next dir = (buildHittingTree w True (nextField dir 2 (x,y)) (move board (Hit (x,y) (nextField dir 2 (x,y)))))
-        leftTreeUp =    if (canHit w LEFT_UP (x,y) board) then next LEFT_UP else Nil
-        leftTreeDown =  if (canHit w LEFT_DOWN (x,y) board) then next LEFT_DOWN else Nil
-        rightTreeUp =   if (canHit w RIGHT_UP (x,y) board) then next RIGHT_UP else Nil
-        rightTreeDown = if (canHit w RIGHT_DOWN (x,y) board) then next RIGHT_DOWN else Nil
-    in HittingNode (x,y) [ leftTreeUp, leftTreeDown, rightTreeUp, rightTreeDown ]
--}
-
 
 genMoves :: Position -> Board -> [Move]
 genMoves (a,b) board = let figureType = get (a,b) board

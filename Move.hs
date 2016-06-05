@@ -8,7 +8,6 @@ module Move (  Move(..)
              , deleteFromBoard
              , standardToQueen
              , getDirection
-             , willBeInside
              , isInside
              , moveEstimation
              ) where
@@ -31,12 +30,7 @@ previousField RIGHT_DOWN i (x,y) = (x-i,y+i)
 previousField LEFT_UP i (x,y) = (x+i,y-i)
 previousField LEFT_DOWN i (x,y) = (x+i,y+i)
 
-willBeInside :: (Ord a1, Ord a, Num a1, Num a) => (a, a1) -> Direction -> Bool
-willBeInside (x,y) LEFT_UP = ((x-2>=0) && (y+2<=7))
-willBeInside (x,y) LEFT_DOWN = ((x-2>=0) && (y-2>=0))
-willBeInside (x,y) RIGHT_UP = ((x+2<=7) && (y+2<=7))
-willBeInside (x,y) RIGHT_DOWN = ((x+2<=7) && (y-2>=0))
-
+isInside :: (Ord a, Num a) => a -> (a,a) -> Direction -> Bool
 isInside f (x,y) LEFT_UP = ((x-f>=0) && (y+f<=7))
 isInside f (x,y) LEFT_DOWN = ((x-f>=0) && (y-f>=0))
 isInside f (x,y) RIGHT_UP = ((x+f<=7) && (y+f<=7))
@@ -81,6 +75,7 @@ standardToQueen :: Figure -> Board -> Position -> Board
 standardToQueen WS board (x,y) = updateBoard board WQ (x,y)
 standardToQueen BS board (x,y) = updateBoard board BQ (x,y)
 
+moveEstimation :: Move -> Int
 moveEstimation ( Step _ _ ) = 0
 moveEstimation ( Hit _ _ ) = 3
 moveEstimation ( HittingSequence [] ) = 0

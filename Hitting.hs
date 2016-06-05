@@ -8,8 +8,6 @@ module Hitting ( HittingTree(..)
     , listtree
     , maximumByM
     , getMaximumHittingPath
-    , chooseTheBestMaximumHittingPath
-    , filterToNotPrintCurrentField
     , buildHittingMovesFromPath
     , buildPaths
 ) where
@@ -50,10 +48,11 @@ canHit BS dir (x,y) board = (isInside 2 (x,y) dir) && ((get (nextField dir 1 (x,
 -- TODO
 blockingWay :: (Num a, Eq a) => a -> Position -> Direction -> Board -> Bool
 blockingWay 1 (x,y) dir board = False
-blockingWay f (x,y) dir board = (length ([ (a+1) | a <- [1..7], (isInside (a+1) (x,y) dir) && ((get (nextField dir a (x,y)) board) == BS) && ((get (nextField dir (a+1) (x,y)) board) == BS)])) /= 0
+blockingWay f (x,y) dir board = (length ([ (a+1) | a <- [1..7], (isInside (a+1) (x,y) dir) && (((get (nextField dir a (x,y)) board) == E) == False) && (((get (nextField dir (a+1) (x,y)) board) == E) == False)])) /= 0
 
 findFirstQueenHitStep :: Figure -> Direction -> Position -> Board -> [Int]
-findFirstQueenHitStep w dir (x,y) board = [ f+1 | f <- [1..7], ((blockingWay f (x,y) dir board) == False ) && (isInside (f+1) (x,y) dir) && ((get (nextField dir f (x,y)) board) == (opposedFigure w)) && ((get (nextField dir (f+1) (x,y)) board) == E)]
+findFirstQueenHitStep w dir (x,y) board = [ f+1 | f <- [1..7], ((blockingWay f (x,y) dir board) == False ) && (isInside (f+1) (x,y) dir)
+    && ((getColor (get (nextField dir f (x,y)) board)) == opposedColor (getColor (get (x,y) board))) && ((get (nextField dir (f+1) (x,y)) board) == E)]
 
 findFirstQueenHit :: Figure -> Direction -> Position -> Board -> [Position]
 findFirstQueenHit w dir (x,y) board
@@ -64,7 +63,6 @@ listtree :: HittingTree a -> [[a]]
 listtree Nil = []
 listtree (HittingNode label [Nil,Nil,Nil,Nil]) = [[label]]
 listtree (HittingNode label xs) = map (label:) $ concat $ map listtree xs
-
 
 maximumByM :: (t -> t -> Ordering) -> [t] -> [t]
 maximumByM c (x:xs) = maximumByM' c xs [x]
@@ -77,20 +75,6 @@ maximumByM c (x:xs) = maximumByM' c xs [x]
 getMaximumHittingPath :: HittingTree a -> [[a]]
 getMaximumHittingPath (HittingNode label []) = []
 getMaximumHittingPath tree = maximumByM (comparing length) (listtree tree)
-
-{-
-    Magicznie wybierz najlepsza
--} -- TODO !!!!!!!!!!!!!!!!!!!
-chooseTheBestMaximumHittingPath :: [[t]] -> [t]
-chooseTheBestMaximumHittingPath path
-    | length(path) == 0 = []
-    | length(path) == 1 = head path
-    | otherwise = head path --for now
-
-filterToNotPrintCurrentField :: [t] -> [t]
-filterToNotPrintCurrentField path
-    | (length(path) == 1) = []
-    | otherwise = path
 
 buildHittingMovesFromPath :: [Position] -> Move
 buildHittingMovesFromPath [] = HittingSequence []
