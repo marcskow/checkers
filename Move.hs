@@ -14,7 +14,6 @@ module Move (  Move(..)
 
 import Board
 
-
 data Move = Step Position Position | Hit Position Position | HittingSequence [ Move ] deriving (Show, Eq)
 data Direction = LEFT_UP | LEFT_DOWN | RIGHT_UP | RIGHT_DOWN
 
@@ -51,17 +50,29 @@ updateBoard m x (c,r) =
 
 move :: Board -> Move -> Board
 move board (Hit (x1,y1) (x2,y2)) =
-    let board' = let board'' = (updateBoard board (get (x1,y1) board) (x2,y2)) in (deleteFromBoard board'' (x1,y1))
+    let board' = let board'' = if(isQueenField board (get (x1,y1) board) y2) then (standardToQueen (get (x1,y1) board) board (x2,y2))
+                               else updateBoard board (get (x1,y1) board) (x2,y2) in (deleteFromBoard board'' (x1,y1))
     in (deleteFromBoard board' (previousField((getDirection (x1,y1)(x2,y2))) 1 (x2,y2)))
 move board (Step (x1,y1) (x2,y2))
     | ((checkIsMoveValid (x1,y1)(x2,y2) board) == True) =
         let board' = (updateBoard board (get (x1,y1) board) (x2,y2))
-        in (deleteFromBoard board' (x1,y1))
+        in if(isQueenField board (get (x1,y1) board) y2) then standardToQueen (get (x1,y1) board) (deleteFromBoard board' (x1,y1)) (x2,y2)
+           else (deleteFromBoard board' (x1,y1))
     | otherwise = board
 move board (HittingSequence []) = board
+move board (HittingSequence (x:[])) =
+    let Hit(x1,y1)(x2,y2) = x
+    in if (isQueenField board (get (x1,y1) board) y2) then standardToQueen (get (x1,y1) board) (move board x) (x2,y2)
+       else move board x
 move board (HittingSequence (x:xs)) =
     let board' = move board (x)
     in move board' (HittingSequence xs)
+
+isQueenField board WS 7 = True
+isQueenField board WS _ = False
+isQueenField board BS 0 = True
+isQueenField board BS _ = False
+isQueenField board _ _ = False
 
 checkIsMoveValid :: (Ord a, Num a) => Position -> (Int, a) -> Board -> Bool
 checkIsMoveValid (x1,y1)(x2,y2) board

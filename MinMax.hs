@@ -2,8 +2,8 @@ module MinMax ( ) where
 
 import Board
 import Move
-import Generate
 import Hitting
+import Generate
 import Utils
 import Data.Tree
 

@@ -1,6 +1,6 @@
 module Board ( opposedFigure, startingBoard, sh
 			 , get, opposedColor, getColor, is
-			 , playableArea
+			 , playableArea, get'
 			 , Figure(..), Field(..), Color(..)
 			 , Board, Position
 			 ) where
@@ -64,7 +64,6 @@ startingBoard = reverse [[  E, BS,  E, BS,  E, BS,  E, BS],
 		                 [  E, WS,  E, WS,  E, WS,  E, WS ],
 		                 [ WS,  E, WS,  E, WS,  E, WS,  E ]]
 
-
 playableArea :: [Position]
 playableArea = [(0,0),(2,0),(4,0),(6,0),(1,1),(3,1),(5,1),(7,1),
                 (0,2),(2,2),(4,2),(6,2),(1,3),(3,3),(5,3),(7,3),
@@ -111,3 +110,6 @@ sh board = putStr("  0 1 2 3 4 5 6 7 \n" ++ (showDescription rowsIndex (boardInR
 
 get :: Position -> [[a]] -> a
 get (x,y) board = (board !! y) !! x
+
+get' :: Board -> Position -> Figure
+get' board (x,y) = get (x,y) board
