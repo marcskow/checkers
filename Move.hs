@@ -66,6 +66,7 @@ move board (HittingSequence (x:xs)) =
 checkIsMoveValid :: (Ord a, Num a) => Position -> (Int, a) -> Board -> Bool
 checkIsMoveValid (x1,y1)(x2,y2) board
     | ((x2>=0) && (x2<=7) && (y2>=0) && (y2<=7) && (abs(x2-x1) <= 1) && (((get (x1,y1) board) == WS) || ((get (x1,y1) board) == BS))) = True
+    | ((x2>=0) && (x2<=7) && (y2>=0) && (y2<=7) && (((get (x1,y1) board) == WQ) || ((get (x1,y1) board) == BQ))) = True
     | otherwise = False
 
 deleteFromBoard :: Board -> Position -> Board
