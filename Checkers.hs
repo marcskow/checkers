@@ -40,13 +40,13 @@ playerVsPlayer board color = do
     move by choosing a valid one. Game ends when player or computer cannot make any move
     (So in the case of a tie or when player or computer has lost all his pawns)
 -}
-playerVsComputer :: Board -> Color -> IO ()
-playerVsComputer board playerColor = do
-    if(playerColor == White) then playerMove board playerColor
-    else computerMove board playerColor
+playerVsComputer :: Board -> Color -> Int -> IO ()
+playerVsComputer board playerColor mmDepth = do
+    if(playerColor == White) then playerMove board playerColor mmDepth
+    else computerMove board playerColor mmDepth
 
-playerMove :: Board -> Color -> IO ()
-playerMove board playerColor = do
+playerMove :: Board -> Color -> Int -> IO ()
+playerMove board playerColor mmDepth = do
     if(isOver playerColor board) then do
          sh $ reverse board
          putStrLn $ "You lose, and computer win"
@@ -57,17 +57,17 @@ playerMove board playerColor = do
          let inputMove = (myParser line)
          if(inputMove `notElem` (genAllPossibleMoves playableArea playerColor board)) then do
             putStrLn "You can't move like this, maybe you should hit or it's not valid move"
-            playerMove board playerColor
+            playerMove board playerColor mmDepth
          else do
          let board' = move board inputMove
-         computerMove board' playerColor
+         computerMove board' playerColor mmDepth
 
-computerMove :: Board -> Color -> IO ()
-computerMove board playerColor = do
+computerMove :: Board -> Color -> Int -> IO ()
+computerMove board playerColor mmDepth = do
         if(isOver (opposedColor playerColor) board) then do
             sh $ reverse board
             putStrLn "You win, computer lose"
-        else playerMove (move board (minmax (opposedColor playerColor) (opposedColor playerColor) 4 board)) playerColor
+        else playerMove (move board (minmax (opposedColor playerColor) (opposedColor playerColor) 4 board)) playerColor mmDepth
 
 {-
     This function allows us to show checkers game simulation as computer vs computer mode.
@@ -75,17 +75,16 @@ computerMove board playerColor = do
     You are also giving threadDelay (microseconds) as parameter so that you can observe computer moves if MinMax works too fast.
     (So in the case of a tie or when player or computer has lost all his pawns)
 -}
-computerVsComputer :: Board -> Color -> Int -> Int -> IO ()
-computerVsComputer board color mmDepth threadDel = do
+computerVsComputer :: Board -> Color -> Int -> IO ()
+computerVsComputer board color mmDepth = do
         if(isOver color board) then do
             sh $ reverse board
-            if(color == White) then putStrLn "Black computer win, or there is a tie"
-            else putStrLn "White computer win, or there is a tie"
+            if(color == White) then putStrLn "Black computer win"
+            else putStrLn "White computer win"
         else do
             sh $ reverse board
-            threadDelay threadDel
             let board' = (move board (minmax color color mmDepth board))
-            computerVsComputer board' (opposedColor color) mmDepth threadDel
+            computerVsComputer board' (opposedColor color) mmDepth
 
 isOver :: Color -> Board -> Bool
 isOver color board = ((minmax color color 0 board) == (Step (0,0)(0,0)))
