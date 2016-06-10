@@ -1,15 +1,7 @@
+{- Autor: Marcin Skowron, Informatyka II rok -}
 module Hitting ( HittingTree(..)
-    , buildHittingTree
-    , buildHittingQueenTree
-    , canHit
-    , blockingWay
-    , findFirstQueenHitStep
-    , findFirstQueenHit
-    , listtree
-    , maximumByM
-    , getMaximumHittingPath
-    , buildHittingMovesFromPath
-    , buildPaths
+    , buildHittingTree, buildHittingQueenTree
+    , buildPaths, getMaximumHittingPath
 ) where
 
 import Data.Function
@@ -19,7 +11,11 @@ import Board
 
 data HittingTree a = Nil | HittingNode a [ HittingTree a ] deriving Show
 
-
+{-
+    This is function responsible for building hittings tree from given field. It checks if a pawn can make hit in
+    the direction and then builds subtree from next field (field on which a pawn stands after hit).
+    This function builds hittings tree only for standards pawns.
+-}
 buildHittingTree :: Figure -> Bool -> Position -> Board -> HittingTree Position
 buildHittingTree w False (x,y) board = Nil
 buildHittingTree w t (x,y) board =
@@ -30,6 +26,9 @@ buildHittingTree w t (x,y) board =
         rightTreeDown = if (canHit w RIGHT_DOWN (x,y) board) then next RIGHT_DOWN else Nil
     in HittingNode (x,y) [ leftTreeUp, leftTreeDown, rightTreeUp, rightTreeDown ]
 
+{-
+    This is the same function as buildHittingTree but for queens.
+-}
 buildHittingQueenTree :: Figure -> Bool -> Position -> Board -> HittingTree Position
 buildHittingQueenTree w False (x,y) board = Nil
 buildHittingQueenTree w t (x,y) board =
@@ -42,10 +41,9 @@ buildHittingQueenTree w t (x,y) board =
     in HittingNode (x,y) [ leftTreeUp, leftTreeDown, rightTreeUp, rightTreeDown ]
 
 canHit :: Figure -> Direction -> Position -> Board -> Bool
-canHit WS dir (x,y) board = (isInside 2 (x,y) dir) && ((get (nextField dir 1 (x,y)) board) == BS) && ((get (nextField dir 2 (x,y)) board) == E)
-canHit BS dir (x,y) board = (isInside 2 (x,y) dir) && ((get (nextField dir 1 (x,y)) board) == WS) && ((get (nextField dir 2 (x,y)) board) == E)
+canHit WS dir (x,y) board = (isInside 2 (x,y) dir) && ((getColor((get (nextField dir 1 (x,y)) board))) == Black) && ((get (nextField dir 2 (x,y)) board) == E)
+canHit BS dir (x,y) board = (isInside 2 (x,y) dir) && ((getColor((get (nextField dir 1 (x,y)) board))) == White) && ((get (nextField dir 2 (x,y)) board) == E)
 
--- TODO
 blockingWay :: (Num a, Eq a) => a -> Position -> Direction -> Board -> Bool
 blockingWay 1 (x,y) dir board = False
 blockingWay f (x,y) dir board = (length ([ (a+1) | a <- [1..7], (isInside (a+1) (x,y) dir) && (((get (nextField dir a (x,y)) board) == E) == False) && (((get (nextField dir (a+1) (x,y)) board) == E) == False)])) /= 0
@@ -64,17 +62,17 @@ listtree Nil = []
 listtree (HittingNode label [Nil,Nil,Nil,Nil]) = [[label]]
 listtree (HittingNode label xs) = map (label:) $ concat $ map listtree xs
 
-maximumByM :: (t -> t -> Ordering) -> [t] -> [t]
-maximumByM c (x:xs) = maximumByM' c xs [x]
-  where maximumByM' _ [] acc = acc
-        maximumByM' c (x:xs) acc@(a:_) = case x `c` a of
-          LT -> maximumByM' c xs acc
-          EQ -> maximumByM' c xs (x:acc)
-          GT -> maximumByM' c xs [x]
+maximumBy :: (t -> t -> Ordering) -> [t] -> [t]
+maximumBy c (x:xs) = maximumBy' c xs [x]
+  where maximumBy' _ [] acc = acc
+        maximumBy' c (x:xs) acc@(a:_) = case x `c` a of
+          LT -> maximumBy' c xs acc
+          EQ -> maximumBy' c xs (x:acc)
+          GT -> maximumBy' c xs [x]
 
 getMaximumHittingPath :: HittingTree a -> [[a]]
 getMaximumHittingPath (HittingNode label []) = []
-getMaximumHittingPath tree = maximumByM (comparing length) (listtree tree)
+getMaximumHittingPath tree = maximumBy (comparing length) (listtree tree)
 
 buildHittingMovesFromPath :: [Position] -> Move
 buildHittingMovesFromPath [] = HittingSequence []

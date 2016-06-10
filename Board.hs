@@ -1,3 +1,4 @@
+{- Autor: Marcin Skowron, Informatyka II rok -}
 module Board ( opposedFigure, startingBoard, sh
 			 , get, opposedColor, getColor, is
 			 , playableArea, get'

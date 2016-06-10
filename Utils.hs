@@ -1,7 +1,5 @@
-module Utils ( add
-    , sub
-    , multi
-) where
+{- Autor: Marcin Skowron, Informatyka II rok -}
+module Utils ( add, sub, multi ) where
 
 add :: Int -> Int -> Int
 add x y = x + y

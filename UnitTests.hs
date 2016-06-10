@@ -1,9 +1,9 @@
+{- Autor: Marcin Skowron, Informatyka II rok -}
 import Board
 import Hitting
 import MinMax
 import Move
 import Utils
-
 
 {-
     Unit tests for the function responsible for movement. Tested feature:
@@ -34,40 +34,6 @@ tryTests = do
 
 printTest :: String -> Bool -> IO ()
 printTest nr test = if(test == True) then putStr "" else putStrLn ("Test failed: " ++ nr)
-
-minmaxBoard :: Board
-minmaxBoard = [[WS,E,WS,E,WS,E,WS,E],[E,WS,E,WS,E,E,E,WS],[WS,E,E,E,E,E,E,E],[E,E,E,WS,E,BS,E,WS],
-               [E,WS,E,E,E,E,E,E],[E,E,E,E,E,BS,E,BS],[BS,E,BS,E,E,E,BS,E],[E,BS,E,BS,E,BS,E,BS]]
-
-emptyBoard :: Board
-emptyBoard =   [[E,E,E,E,E,E,E,E],
-                [E,E,E,E,E,E,E,E],
-                [E,E,E,E,E,E,E,E],
-                [E,E,E,E,E,E,E,E],
-                [E,E,E,E,E,E,E,E],
-                [E,E,E,E,E,E,E,E],
-                [E,E,E,E,E,E,E,E],
-                [E,E,E,E,E,E,E,E]]
-
-boardBeforeSToQHit :: Board
-boardBeforeSToQHit =   [[E,E,E,E,E,E,E,E],
-                        [E,E,WS,E,E,E,E,E],
-                        [E,E,E,E,E,E,E,E],
-                        [WS,E,E,E,WS,E,E,E],
-                        [E,BS,E,E,E,BS,E,E],
-                        [E,E,E,E,E,E,E,E],
-                        [E,E,E,BS,E,E,E,E],
-                        [E,E,E,E,E,E,E,E]]
-
-boardBeforeSToQStep :: Board
-boardBeforeSToQStep =   [[E,E,E,E,E,E,E,E],
-                        [BS,E,E,E,WS,E,WS,E],
-                        [E,E,E,E,E,E,E,BS],
-                        [E,E,E,E,E,E,E,E],
-                        [E,E,E,E,E,E,E,E],
-                        [E,E,E,WS,E,E,E,E],
-                        [WS,E,E,E,BS,E,BS,E],
-                        [E,E,E,E,E,E,E,E]]
 
 boardWSMove :: Board
 boardWSMove =           [[ WS,  E, WS,  E, WS,  E, WS,  E ],
@@ -216,3 +182,8 @@ boardAfterBQStep =      [[ WS,  E, WS,  E, WS,  E, WS,  E ],
 		                 [  E, BS,  E, BS,  E,  E,  E, BS ],
 		                 [ BS,  E, BS,  E, BS,  E, BS,  E ],
 		                 [  E, BS,  E, BS,  E, BS,  E, BS ]]
+
+minmaxBoard = [[WS,E,WS,E,WS,E,WS,E],[E,WS,E,WS,E,E,E,WS],[WS,E,E,E,E,E,E,E],[E,E,E,WS,E,BS,E,WS],[E,WS,E,E,E,E,E,E],[E,E,E,E,E,BS,E,BS],[BS,E,BS,E,E,E,BS,E],[E,BS,E,BS,E,BS,E,BS]]
+emptyBoard = [[E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E]]
+boardBeforeSToQHit = [[E,E,E,E,E,E,E,E],[E,E,WS,E,E,E,E,E],[E,E,E,E,E,E,E,E],[WS,E,E,E,WS,E,E,E],[E,BS,E,E,E,BS,E,E],[E,E,E,E,E,E,E,E],[E,E,E,BS,E,E,E,E],[E,E,E,E,E,E,E,E]]
+boardBeforeSToQStep = [[E,E,E,E,E,E,E,E],[BS,E,E,E,WS,E,WS,E],[E,E,E,E,E,E,E,BS],[E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E],[E,E,E,WS,E,E,E,E],[WS,E,E,E,BS,E,BS,E],[E,E,E,E,E,E,E,E]]

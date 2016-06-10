@@ -1,3 +1,4 @@
+{- Autor: Marcin Skowron, Informatyka II rok -}
 module Generate ( genMoves
         , genNormalMoves, genAllNormalQueenMoves
         , genNormalQueenSteps, genNormalQueenMoves
@@ -10,11 +11,16 @@ import Board
 import Move
 import Hitting
 
+{-
+    This function is responsible for generate all moves possible to do from given field
+    it is used by MinMax algorithm to generate all possible player moves.
+-}
 genMoves :: Position -> Board -> [Move]
-genMoves (a,b) board = let figureType = get (a,b) board
-                           hittings = generateHittings figureType (a,b) board
-                           in if ((head hittings) == HittingSequence []) then genNormalMoves figureType (a,b) board
-                              else generateHittings figureType (a,b) board
+genMoves (a,b) board =
+        let figureType = get (a,b) board
+            hittings = generateHittings figureType (a,b) board
+        in if ((head hittings) == HittingSequence []) then genNormalMoves figureType (a,b) board
+           else generateHittings figureType (a,b) board
 
 genNormalMoves :: Figure -> Position -> Board -> [Move]
 genNormalMoves WS (a,b) board = filterNormalMoves (a,b) (genAllNormalMoves WS (a,b)) board

@@ -1,4 +1,7 @@
-module MinMax ( minmax, build, genAllPossibleMoves, generatePlayTree, getMaximumPath, getMaxLeaf, estimateMap,count ) where
+{- Autor: Marcin Skowron, Informatyka II rok -}
+module MinMax ( minmax, build, genAllPossibleMoves,
+                generatePlayTree, getMaximumPath,
+                getMaxLeaf, estimateMap,count ) where
 
 import Board
 import Move
@@ -9,18 +12,14 @@ import Data.Tree
 
 data EstimatedMap = Estimated [[Figure]] Int deriving Show
 
-buildSubForest :: Color -> Color -> Int -> [Board] -> [Tree EstimatedMap]
-buildSubForest myColor color depth [] = []
-buildSubForest myColor color depth (map : maps) = [Node (Estimated map (estimateMap myColor map)) [(generatePlayTree myColor (opposedColor color) (depth - 1) map)]] ++ (buildSubForest myColor color depth maps)
-
-listtree' :: Tree a -> [[a]]
-listtree' (Node label []) = [[label]]
-listtree' (Node label xs) = map (label:) $ concat $ map listtree' xs
+minmax :: Color -> Color -> Int -> Board -> Move
+minmax myColor color depth actualmap = getMaxMove movesAndWeights where movesAndWeights = build (genAllPossibleMoves playableArea color actualmap) myColor color depth actualmap
 
 {-
-    gdyby mieć możliwe ruchy dla danej mapy, a następnie ocenić każdy ruch za pomocą minmaxa..
+    This function generate the game tree from the current map. Every map is estimated and in every node of tree there are
+    (map, estimation) tuple as label. This is main function of MinMax algorithm (Of course big contribution here has also
+    careful estimation). Other functions are helpers.
 -}
-
 generatePlayTree :: Color -> Color -> Int -> Board -> Tree EstimatedMap
 generatePlayTree myColor color 0 actualmap = Node (Estimated actualmap (estimateMap myColor actualmap)) []
 generatePlayTree myColor color depth actualmap =
@@ -30,8 +29,13 @@ generatePlayTree myColor color depth actualmap =
         estimate = estimateMap myColor actualmap
         in Node (Estimated actualmap estimate) subforest
 
-minmax :: Color -> Color -> Int -> Board -> Move
-minmax myColor color depth actualmap = getMaxMove movesAndWeights where movesAndWeights = build (genAllPossibleMoves playableArea color actualmap) myColor color depth actualmap
+buildSubForest :: Color -> Color -> Int -> [Board] -> [Tree EstimatedMap]
+buildSubForest myColor color depth [] = []
+buildSubForest myColor color depth (map : maps) = [Node (Estimated map (estimateMap myColor map)) [(generatePlayTree myColor (opposedColor color) (depth - 1) map)]] ++ (buildSubForest myColor color depth maps)
+
+listtree' :: Tree a -> [[a]]
+listtree' (Node label []) = [[label]]
+listtree' (Node label xs) = map (label:) $ concat $ map listtree' xs
 
 getMaxMove :: Ord a => [(Move, a)] -> Move
 getMaxMove [] = Step (0,0)(0,0)
