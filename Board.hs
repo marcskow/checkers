@@ -49,11 +49,6 @@ opposedFigure f
     | f == WQ = BQ
     | f == E = E
 
-{-
-    We are using hardcoded board, should it has it's own type ?
-    Probably yes
--}
-
 startingBoard :: Board
 startingBoard = reverse [[  E, BS,  E, BS,  E, BS,  E, BS],
                          [ BS,  E, BS,  E, BS,  E, BS,  E ],
@@ -71,7 +66,7 @@ playableArea = [(0,0),(2,0),(4,0),(6,0),(1,1),(3,1),(5,1),(7,1),
                 (0,6),(2,6),(4,6),(6,6),(1,7),(3,7),(5,7),(7,7)]
 
 {-
-    We are using unicode, where:
+    I am using unicode, where:
     26C0 == 9920 is White Pawn icon (in black console we are using it as Black Pawn icon)
     26C1 == 9921 is White Queen icon (in black console we are using it as Black Queen icon)
     26C2 == 9922 is Black Pawn icon (in black console we are using it as White Pawn icon)

@@ -1,4 +1,4 @@
-module MinMax ( ) where
+module MinMax ( minmax, build, genAllPossibleMoves, generatePlayTree, getMaximumPath, getMaxLeaf, estimateMap,count ) where
 
 import Board
 import Move
@@ -33,7 +33,8 @@ generatePlayTree myColor color depth actualmap =
 minmax :: Color -> Color -> Int -> Board -> Move
 minmax myColor color depth actualmap = getMaxMove movesAndWeights where movesAndWeights = build (genAllPossibleMoves playableArea color actualmap) myColor color depth actualmap
 
-getMaxMove :: Ord a => [(t,a)] -> t
+getMaxMove :: Ord a => [(Move, a)] -> Move
+getMaxMove [] = Step (0,0)(0,0)
 getMaxMove (x:xs) =
     let (move,weight) = x
     in if(weight == (maximum (buildOnlyWeights (x:xs)))) then move else (getMaxMove xs)
@@ -84,6 +85,7 @@ getOnlyHittings [] = []
 getOnlyHittings (m:moves) = (if(isMoveHitting m) then [m] else []) ++ getOnlyHittings moves
 
 filterMoves :: [Move] -> [Move]
+filterMoves [] = []
 filterMoves (m : moves) = if(areHittingsInside (m:moves)) then getOnlyHittings (m:moves) else (m:moves)
 
 genAllPossibleMoves' :: [Position] -> Color -> Board -> [Move]
@@ -103,4 +105,4 @@ estimateMap myColor map
 
 count :: Figure -> [Position] -> Board -> Int
 count t [] board = 0
-count t (f : fields) board = if((get f board) == t) then 1 else 0 + count t fields board
+count t (f : fields) board = (if((get f board) == t) then 1 else 0) + count t fields board

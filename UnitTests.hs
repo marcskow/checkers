@@ -4,6 +4,13 @@ import MinMax
 import Move
 import Utils
 
+
+{-
+    Unit tests for the function responsible for movement. Tested feature:
+        - move :: Board -> Move -> Board -- Defined at Move.hs
+        - updateBoard :: Board -> Figure -> Position -> Board -- Defined at Move.hs
+-}
+tryTests :: IO ()
 tryTests = do
     printTest "1" $ (move boardBSMove $ Step (1,5)(0,4)) == boardAfterBSStep
     printTest "2" $ (move boardBSMove $ Hit(7,5)(5,3)) == boardAfterBSHit
@@ -18,8 +25,19 @@ tryTests = do
     printTest "11" $ (move boardBeforeBSHittingsToQueen $ HittingSequence [Hit (4,4)(2,2), Hit (2,2)(0,0)]) == boardAfterBSHittingsToQueen
     printTest "12" $ (move emptyBoard $ Step (0,0)(1,1)) == emptyBoard
     printTest "13" $ (get' (updateBoard emptyBoard WS (0,0)) (0,0)) == WS
+    printTest "14" $ (get' (move boardBeforeSToQStep (Step (0,6)(1,7))) (1,7)) == WQ
+    printTest "15" $ (get' (move boardBeforeSToQStep (Step (0,1)(1,0))) (1,0)) == BQ
+    printTest "16" $ (get' (move boardBeforeSToQStep (HittingSequence[Hit(7,2)(5,0),Hit(5,0)(3,2)])) (3,2)) == BS
+    printTest "17" $ (get' (move boardBeforeSToQStep (HittingSequence[Hit(3,5)(5,7),Hit(5,7)(7,3)])) (7,3)) == WS
+    printTest "18" $ (get' (move boardBeforeSToQHit (HittingSequence[Hit(5,4)(3,2),Hit(3,2)(1,0)])) (1,0)) == BQ
+    printTest "19" $ (get' (move boardBeforeSToQHit (HittingSequence[Hit(0,3)(2,5),Hit(2,5)(4,7)])) (4,7)) == WQ
 
+printTest :: String -> Bool -> IO ()
 printTest nr test = if(test == True) then putStr "" else putStrLn ("Test failed: " ++ nr)
+
+minmaxBoard :: Board
+minmaxBoard = [[WS,E,WS,E,WS,E,WS,E],[E,WS,E,WS,E,E,E,WS],[WS,E,E,E,E,E,E,E],[E,E,E,WS,E,BS,E,WS],
+               [E,WS,E,E,E,E,E,E],[E,E,E,E,E,BS,E,BS],[BS,E,BS,E,E,E,BS,E],[E,BS,E,BS,E,BS,E,BS]]
 
 emptyBoard :: Board
 emptyBoard =   [[E,E,E,E,E,E,E,E],
@@ -30,6 +48,26 @@ emptyBoard =   [[E,E,E,E,E,E,E,E],
                 [E,E,E,E,E,E,E,E],
                 [E,E,E,E,E,E,E,E],
                 [E,E,E,E,E,E,E,E]]
+
+boardBeforeSToQHit :: Board
+boardBeforeSToQHit =   [[E,E,E,E,E,E,E,E],
+                        [E,E,WS,E,E,E,E,E],
+                        [E,E,E,E,E,E,E,E],
+                        [WS,E,E,E,WS,E,E,E],
+                        [E,BS,E,E,E,BS,E,E],
+                        [E,E,E,E,E,E,E,E],
+                        [E,E,E,BS,E,E,E,E],
+                        [E,E,E,E,E,E,E,E]]
+
+boardBeforeSToQStep :: Board
+boardBeforeSToQStep =   [[E,E,E,E,E,E,E,E],
+                        [BS,E,E,E,WS,E,WS,E],
+                        [E,E,E,E,E,E,E,BS],
+                        [E,E,E,E,E,E,E,E],
+                        [E,E,E,E,E,E,E,E],
+                        [E,E,E,WS,E,E,E,E],
+                        [WS,E,E,E,BS,E,BS,E],
+                        [E,E,E,E,E,E,E,E]]
 
 boardWSMove :: Board
 boardWSMove =           [[ WS,  E, WS,  E, WS,  E, WS,  E ],

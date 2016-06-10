@@ -42,7 +42,7 @@ getDirection (x1, y1)(x2, y2)
     | (x2 > x1 && y2 > y1) = RIGHT_UP
     | (x2 > x1 && y2 < y1) = RIGHT_DOWN
 
-updateBoard :: [[a]] -> a -> (Int, Int) -> [[a]]
+updateBoard :: Board -> Figure -> Position -> Board
 updateBoard m x (c,r) =
   take r m ++
   [take c (m !! r) ++ [x] ++ drop (c + 1) (m !! r)] ++
@@ -50,8 +50,7 @@ updateBoard m x (c,r) =
 
 move :: Board -> Move -> Board
 move board (Hit (x1,y1) (x2,y2)) =
-    let board' = let board'' = if(isQueenField board (get (x1,y1) board) y2) then (standardToQueen (get (x1,y1) board) board (x2,y2))
-                               else updateBoard board (get (x1,y1) board) (x2,y2) in (deleteFromBoard board'' (x1,y1))
+    let board' = let board'' = updateBoard board (get (x1,y1) board) (x2,y2) in (deleteFromBoard board'' (x1,y1))
     in (deleteFromBoard board' (previousField((getDirection (x1,y1)(x2,y2))) 1 (x2,y2)))
 move board (Step (x1,y1) (x2,y2))
     | ((checkIsMoveValid (x1,y1)(x2,y2) board) == True) =
