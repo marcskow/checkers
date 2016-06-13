@@ -1,7 +1,7 @@
 {- Autor: Marcin Skowron, Informatyka II rok -}
 module MinMax ( minmax, build, genAllPossibleMoves,
                 generatePlayTree, getMaximumPath,
-                getMaxLeaf, estimateMap,count ) where
+                getMaxLeaf, estimateMap,count,minMaxBug ) where
 
 import Board
 import Move
@@ -9,8 +9,19 @@ import Hitting
 import Generate
 import Utils
 import Data.Tree
+import Data.Function
+import Data.Ord
 
 data EstimatedMap = Estimated [[Figure]] Int deriving Show
+
+minMaxBug = [[E,E,WS,E,E,E,WS,E],
+             [E,WS,E,WS,E,WS,E,BS],
+             [E,E,WS,E,E,E,BS,E],
+             [E,E,E,WS,E,E,E,WS],
+             [WS,E,WS,E,E,E,E,E],
+             [E,BS,E,E,E,BS,E,BS],
+             [BS,E,BS,E,BS,E,E,E],
+             [E,E,E,BS,E,BS,E,BS]]
 
 minmax :: Color -> Color -> Int -> Board -> Move
 minmax myColor color depth actualmap = getMaxMove movesAndWeights where movesAndWeights = build (genAllPossibleMoves playableArea color actualmap) myColor color depth actualmap
@@ -86,7 +97,24 @@ areHittingsInside (m : moves) = (isMoveHitting m) || (areHittingsInside moves)
 
 getOnlyHittings :: [Move] -> [Move]
 getOnlyHittings [] = []
-getOnlyHittings (m:moves) = (if(isMoveHitting m) then [m] else []) ++ getOnlyHittings moves
+getOnlyHittings (m:moves) = let hittings = ((if(isMoveHitting m) then [m] else []) ++ getOnlyHittings moves)
+                            in getTheMax hittings
+
+hittingsElements :: Move -> Int
+hittingsElements (HittingSequence []) = 0
+hittingsElements (HittingSequence (x:xs)) = 1 + (hittingsElements (HittingSequence xs))
+
+getTheMax :: [Move] -> [Move]
+getTheMax [] = []
+getTheMax (h:hs) = maximumByB (comparing hittingsElements) (h:hs)
+
+maximumByB :: (Move -> Move -> Ordering) -> [Move] -> [Move]
+maximumByB c (x:xs) = maximumBy' c xs [x]
+  where maximumBy' _ [] acc = acc
+        maximumBy' c (x:xs) acc@(a:_) = case x `c` a of
+          LT -> maximumBy' c xs acc
+          EQ -> maximumBy' c xs (x:acc)
+          GT -> maximumBy' c xs [x]
 
 filterMoves :: [Move] -> [Move]
 filterMoves [] = []

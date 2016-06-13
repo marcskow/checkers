@@ -5,6 +5,7 @@ import Data.Char
 import Board
 import Move
 import MinMax
+import Parser
 import Data.List.Split
 import Control.Concurrent
 
@@ -60,6 +61,7 @@ playerMove board playerColor mmDepth = do
             playerMove board playerColor mmDepth
          else do
          let board' = move board inputMove
+         sh $ reverse board'
          computerMove board' playerColor mmDepth
 
 computerMove :: Board -> Color -> Int -> IO ()
@@ -67,7 +69,10 @@ computerMove board playerColor mmDepth = do
         if(isOver (opposedColor playerColor) board) then do
             sh $ reverse board
             putStrLn "You win, computer lose"
-        else playerMove (move board (minmax (opposedColor playerColor) (opposedColor playerColor) 4 board)) playerColor mmDepth
+        else do
+        let minMaxMove = (minmax (opposedColor playerColor) (opposedColor playerColor) 4 board)
+        putStrLn $ "Computer move: " ++ (parseMoveToOutput minMaxMove)
+        playerMove (move board minMaxMove) playerColor mmDepth
 
 {-
     This function allows us to show checkers game simulation as computer vs computer mode.
@@ -75,16 +80,23 @@ computerMove board playerColor mmDepth = do
     You are also giving threadDelay (microseconds) as parameter so that you can observe computer moves if MinMax works too fast.
     (So in the case of a tie or when player or computer has lost all his pawns)
 -}
-computerVsComputer :: Board -> Color -> Int -> IO ()
-computerVsComputer board color mmDepth = do
+computerVsComputer :: Board -> Color -> Int -> Bool -> IO ()
+computerVsComputer board color mmDepth shBoard = do
         if(isOver color board) then do
-            sh $ reverse board
+            if(shBoard == True) then sh $ reverse board
+            else do
             if(color == White) then putStrLn "Black computer win"
             else putStrLn "White computer win"
         else do
-            sh $ reverse board
-            let board' = (move board (minmax color color mmDepth board))
-            computerVsComputer board' (opposedColor color) mmDepth
+            let minMaxMove = (minmax color color mmDepth board)
+                board' = (move board minMaxMove)
+            if(shBoard == True) then do
+                sh $ reverse board
+                putStrLn $ parseMoveToOutput minMaxMove
+                computerVsComputer board' (opposedColor color) mmDepth shBoard
+            else do
+                putStrLn $ parseMoveToOutput minMaxMove
+                computerVsComputer board' (opposedColor color) mmDepth shBoard
 
 isOver :: Color -> Board -> Bool
 isOver color board = ((minmax color color 0 board) == (Step (0,0)(0,0)))
@@ -121,13 +133,3 @@ hits :: [String] -> [Move]
 hits [] = []
 hits (x:[]) = []
 hits (x1:x2:xs) = (Hit(parsePosition x1)(parsePosition x2)) : (hits (x2:xs))
-
-parsePosition :: String -> Position
-parsePosition x = positions !! ((read x :: Int)-1)
-
-positions :: [Position]
-positions = [(1,7),(3,7),(5,7),(7,7),(0,6),(2,6),(4,6),(6,6),
-             (1,5),(3,5),(5,5),(7,5),(0,4),(2,4),(4,4),(6,4),
-             (1,3),(3,3),(5,3),(7,3),(0,2),(2,2),(4,2),(6,2),
-             (1,1),(3,1),(5,1),(7,1),(0,0),(2,0),(4,0),(6,0)]
-
