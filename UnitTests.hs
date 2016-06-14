@@ -1,14 +1,18 @@
 {- Autor: Marcin Skowron, Informatyka II rok -}
 import Board
 import Hitting
+import Generate
 import MinMax
 import Move
 import Utils
 
 {-
-    Unit tests for the function responsible for movement. Tested feature:
+    Unit tests. Features tested:
         - move :: Board -> Move -> Board -- Defined at Move.hs
         - updateBoard :: Board -> Figure -> Position -> Board -- Defined at Move.hs
+        - genMoves :: Position -> Board -> [Move]
+        - minmax :: Color -> Color -> Int -> Board -> Move
+    Function print warning only if test fails.
 -}
 tryTests :: IO ()
 tryTests = do
@@ -31,6 +35,9 @@ tryTests = do
     printTest "17" $ (get' (move boardBeforeSToQStep (HittingSequence[Hit(3,5)(5,7),Hit(5,7)(7,3)])) (7,3)) == WS
     printTest "18" $ (get' (move boardBeforeSToQHit (HittingSequence[Hit(5,4)(3,2),Hit(3,2)(1,0)])) (1,0)) == BQ
     printTest "19" $ (get' (move boardBeforeSToQHit (HittingSequence[Hit(0,3)(2,5),Hit(2,5)(4,7)])) (4,7)) == WQ
+    printTest "20" $ (genMoves (0,2) boardWSMove) == [HittingSequence [Hit(0,2)(2,4),Hit(2,4)(4,6),Hit(4,6)(6,4)]]
+    printTest "21" $ (HittingSequence [Hit(0,2)(2,4),Hit(2,4)(0,6)]) `notElem` (genMoves (0,2) boardWSMove)
+    printTest "22" $ (minmax White White 3 minmaxBoard) == (HittingSequence [Hit(0,2)(2,4),Hit(2,4)(4,6),Hit(4,6)(6,4)])
 
 printTest :: String -> Bool -> IO ()
 printTest nr test = if(test == True) then putStr "" else putStrLn ("Test failed: " ++ nr)
@@ -183,7 +190,16 @@ boardAfterBQStep =      [[ WS,  E, WS,  E, WS,  E, WS,  E ],
 		                 [ BS,  E, BS,  E, BS,  E, BS,  E ],
 		                 [  E, BS,  E, BS,  E, BS,  E, BS ]]
 
-minmaxBoard = [[WS,E,WS,E,WS,E,WS,E],[E,WS,E,WS,E,E,E,WS],[WS,E,E,E,E,E,E,E],[E,E,E,WS,E,BS,E,WS],[E,WS,E,E,E,E,E,E],[E,E,E,E,E,BS,E,BS],[BS,E,BS,E,E,E,BS,E],[E,BS,E,BS,E,BS,E,BS]]
+minmaxBoard :: Board
+minmaxBoard =           [[ WS,  E, WS,  E, WS,  E, WS,  E ],
+		                 [  E, WS,  E, WS,  E, WS,  E, WS ],
+		                 [ WS,  E, WS,  E,  E,  E, WS,  E ],
+		                 [  E, BS,  E, BS,  E,  E,  E,  E ],
+		                 [  E,  E,  E,  E,  E,  E,  E,  E ],
+		                 [  E, BS,  E, BS,  E, BS,  E, BS ],
+		                 [  E,  E, BS,  E,  E,  E, BS,  E ],
+		                 [  E, BS,  E, BS,  E, BS,  E, BS ]]
+
 emptyBoard = [[E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E]]
 boardBeforeSToQHit = [[E,E,E,E,E,E,E,E],[E,E,WS,E,E,E,E,E],[E,E,E,E,E,E,E,E],[WS,E,E,E,WS,E,E,E],[E,BS,E,E,E,BS,E,E],[E,E,E,E,E,E,E,E],[E,E,E,BS,E,E,E,E],[E,E,E,E,E,E,E,E]]
 boardBeforeSToQStep = [[E,E,E,E,E,E,E,E],[BS,E,E,E,WS,E,WS,E],[E,E,E,E,E,E,E,BS],[E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E],[E,E,E,WS,E,E,E,E],[WS,E,E,E,BS,E,BS,E],[E,E,E,E,E,E,E,E]]
