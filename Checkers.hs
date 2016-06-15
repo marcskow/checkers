@@ -1,5 +1,5 @@
 {- Autor: Marcin Skowron, Informatyka II rok -}
-module Checkers () where
+module Checkers ( ) where
 
 import Data.Char
 import Board
@@ -23,8 +23,6 @@ playerVsPlayer board color = do
          putStrLn "Game over"
     else do
          sh $ reverse board
-         if(color == White) then putStrLn "White move, instructions: (step) e.g. 10-11 (hit) e.g. 10x11x12"
-         else putStrLn "Black move, instructions: (step) e.g. 10-11 (hit) e.g. 10x11x12"
          line <- getLine
          let inputMove = (myParser line)
          if(inputMove `notElem` (genAllPossibleMoves playableArea color board)) then do
